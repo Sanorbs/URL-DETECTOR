@@ -1,0 +1,2 @@
+url,label,timestamp,url_length,domain_length,path_length,query_length,https,http,subdomain_count,has_subdomain,suspicious_tld,path_depth,has_file_extension,query_count,has_parameters,suspicious_words,digit_count,special_char_count,has_redirect,has_shortener,entropy
+https://www.linkedin.com/in/sandeep-balaji-662486259/details/certifications/,0,2025-08-13T22:11:43.134160,76,16,52,0,1,0,2,1,0,4,0,0,0,0,9,5,0,0,4.512868515246641
