@@ -3,9 +3,10 @@
 ## ✅ **Pre-Deployment Checklist**
 
 - [ ] All files committed to Git
-- [ ] `requirements.txt` includes `gunicorn`
+- [ ] `requirements-prod.txt` includes `gunicorn`
 - [ ] `app.py` has production settings
 - [ ] Test locally with `gunicorn app:app`
+- [ ] Python version set to 3.11
 
 ## 🎯 **Render Deployment (Recommended)**
 
@@ -24,8 +25,8 @@ git push origin main
 
 ### Step 3: Configuration
 - **Name**: `malicious-url-detector`
-- **Environment**: `Python 3`
-- **Build Command**: `pip install -r requirements.txt`
+- **Environment**: `Python 3.11`
+- **Build Command**: `pip install -r requirements-prod.txt`
 - **Start Command**: `gunicorn app:app`
 - **Plan**: Free
 

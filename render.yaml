@@ -3,8 +3,8 @@ services:
     name: malicious-url-detector
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements-prod.txt
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.16
+        value: 3.11.9

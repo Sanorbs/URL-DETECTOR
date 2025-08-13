@@ -27,8 +27,8 @@ This guide will help you deploy your Flask application to various free hosting p
 3. Connect your GitHub repository
 4. Configure the service:
    - **Name**: `malicious-url-detector`
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
+   - **Environment**: `Python 3.11`
+   - **Build Command**: `pip install -r requirements-prod.txt`
    - **Start Command**: `gunicorn app:app`
    - **Plan**: Free
 
@@ -189,6 +189,18 @@ Visit `/status` endpoint to verify model is loaded.
 2. **App Won't Start**: Verify start command
 3. **Model Loading Error**: Check file paths
 4. **Memory Issues**: Reduce worker count in gunicorn.conf.py
+5. **Scikit-learn Build Error**: Use Python 3.11 and requirements-prod.txt
+
+### Scikit-learn Build Error Fix
+If you encounter this error:
+```
+Cython.Compiler.Errors.CompileError: sklearn/linear_model/_cd_fast.pyx
+```
+
+**Solution:**
+1. Use Python 3.11 (not 3.13)
+2. Use `requirements-prod.txt` instead of `requirements.txt`
+3. Ensure all deployment files are updated
 
 ### Getting Help
 - Check platform-specific logs
