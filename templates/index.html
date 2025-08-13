@@ -355,8 +355,12 @@
 
             <div class="train-section">
                 <button id="trainBtn" class="train-btn">🔄 Retrain Model</button>
+                <button id="forceRetrainBtn" class="train-btn" style="background: #dc3545; margin-left: 15px;">🚨 Force Retrain</button>
                 <p style="margin-top: 15px; color: #6c757d; font-size: 0.9rem;">
                     Improve detection accuracy by retraining the machine learning model
+                </p>
+                <p style="margin-top: 5px; color: #dc3545; font-size: 0.8rem;">
+                    Use Force Retrain if you encounter version compatibility issues
                 </p>
             </div>
         </div>
@@ -555,9 +559,38 @@
             }
         }
 
+        // Force retrain model
+        async function forceRetrainModel() {
+            const forceRetrainBtn = document.getElementById('forceRetrainBtn');
+            forceRetrainBtn.disabled = true;
+            forceRetrainBtn.textContent = '🚨 Force Training...';
+
+            try {
+                const response = await fetch('/force-retrain', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`Model force retrained successfully! Accuracy: ${(data.accuracy * 100).toFixed(1)}%`);
+                    // Reinitialize the app
+                    initializeApp();
+                } else {
+                    alert('Error force retraining model: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Network error during force retraining');
+            } finally {
+                forceRetrainBtn.disabled = false;
+                forceRetrainBtn.textContent = '🚨 Force Retrain';
+            }
+        }
+
         // Event listeners
         document.getElementById('detectBtn').addEventListener('click', detectURL);
         document.getElementById('trainBtn').addEventListener('click', trainModel);
+        document.getElementById('forceRetrainBtn').addEventListener('click', forceRetrainModel);
         document.getElementById('urlInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 detectURL();

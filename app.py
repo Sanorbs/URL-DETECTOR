@@ -188,6 +188,14 @@ def detect_url():
         if not url:
             return jsonify({'error': 'URL is required'}), 400
         
+        # Check if model is loaded
+        if model is None:
+            print("ERROR: Model is None in detect_url")
+            return jsonify({'error': 'Model not loaded'}), 500
+        
+        print(f"Model type: {type(model)}")
+        print(f"Model loaded: {model is not None}")
+        
         # Extract features
         extractor = URLFeatureExtractor()
         features = extractor.extract_features(url)
@@ -199,8 +207,11 @@ def detect_url():
         feature_values = list(features.values())
         feature_array = np.array(feature_values).reshape(1, -1)
         
+        print(f"Feature array shape: {feature_array.shape}")
+        print(f"Feature values: {feature_values}")
+        
         # Make prediction
-        if model is not None:
+        try:
             prediction = model.predict(feature_array)[0]
             probability = model.predict_proba(feature_array)[0]
             
@@ -216,16 +227,24 @@ def detect_url():
             save_features_to_csv(url, features, prediction)
             
             return jsonify(result)
-        else:
-            return jsonify({'error': 'Model not loaded'}), 500
+            
+        except Exception as pred_error:
+            print(f"Prediction error: {pred_error}")
+            return jsonify({'error': f'Prediction failed: {str(pred_error)}'}), 500
             
     except Exception as e:
+        print(f"General error in detect_url: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/train', methods=['POST'])
 def train():
     """Train the model"""
     try:
+        # Force retrain by removing old model
+        if os.path.exists(model_path):
+            os.remove(model_path)
+            print("Removed old model for retraining")
+        
         accuracy = train_model()
         return jsonify({
             'message': 'Model trained successfully',
@@ -233,6 +252,36 @@ def train():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/force-retrain', methods=['POST'])
+def force_retrain():
+    """Force retrain the model (useful for version conflicts)"""
+    try:
+        global model
+        
+        # Remove old model
+        if os.path.exists(model_path):
+            os.remove(model_path)
+            print("Removed old model for forced retraining")
+        
+        # Reset model variable
+        model = None
+        
+        # Create and train new model
+        load_or_create_model()
+        accuracy = train_model()
+        
+        return jsonify({
+            'message': 'Model force retrained successfully',
+            'accuracy': accuracy,
+            'status': 'ready'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'status': 'error'
+        }), 500
 
 @app.route('/status')
 def status():
@@ -248,6 +297,13 @@ def startup():
     """Initialize the application and train model if needed"""
     try:
         global model
+        
+        # Always retrain model in production to avoid version conflicts
+        if os.environ.get('FLASK_ENV') == 'production':
+            # Remove old model to force retraining
+            if os.path.exists(model_path):
+                os.remove(model_path)
+                print("Removed old model for retraining")
         
         # Load or create model if not exists
         if model is None:
