@@ -243,6 +243,48 @@ def status():
         'features_path': features_path
     })
 
+@app.route('/startup')
+def startup():
+    """Initialize the application and train model if needed"""
+    try:
+        global model
+        
+        # Load or create model if not exists
+        if model is None:
+            load_or_create_model()
+        
+        # Train model if it doesn't exist
+        if not os.path.exists(model_path):
+            accuracy = train_model()
+            return jsonify({
+                'message': 'Application started successfully',
+                'model_trained': True,
+                'accuracy': accuracy,
+                'status': 'ready'
+            })
+        else:
+            return jsonify({
+                'message': 'Application started successfully',
+                'model_trained': True,
+                'accuracy': 'Model already exists',
+                'status': 'ready'
+            })
+            
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'status': 'error'
+        }), 500
+
+@app.route('/health')
+def health():
+    """Simple health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'model_loaded': model is not None
+    })
+
 def save_features_to_csv(url, features, label):
     """Save extracted features to CSV for future training"""
     try:
@@ -270,9 +312,10 @@ if __name__ == '__main__':
     # Load or create model on startup
     load_or_create_model()
     
-    # Train model if it's new
-    if model is not None and not os.path.exists(model_path):
-        train_model()
+    # Train model if it's new (only in development)
+    if os.environ.get('FLASK_ENV') == 'development':
+        if model is not None and not os.path.exists(model_path):
+            train_model()
     
     # Production settings
     port = int(os.environ.get('PORT', 5000))

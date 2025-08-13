@@ -301,7 +301,7 @@
                 <h2 style="margin-bottom: 20px; color: #333;">🔍 Analyze URL Security</h2>
                 <div class="input-group">
                     <input type="url" id="urlInput" class="url-input" placeholder="Enter URL to analyze (e.g., https://example.com)" required>
-                    <button id="detectBtn" class="detect-btn">🔍 Detect Threats</button>
+                    <button id="detectBtn" class="detect-btn" disabled>🔍 Detect Threats</button>
                 </div>
             </div>
 
@@ -567,7 +567,28 @@
         // Load stats on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadStats();
+            initializeApp();
         });
+
+        // Initialize the application
+        async function initializeApp() {
+            try {
+                const response = await fetch('/startup');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    console.log('App initialized:', data.message);
+                    // Enable the detect button
+                    document.getElementById('detectBtn').disabled = false;
+                } else {
+                    console.error('App initialization failed:', data.error);
+                    showError('Failed to initialize application. Please refresh the page.');
+                }
+            } catch (error) {
+                console.error('Startup error:', error);
+                showError('Failed to connect to server. Please check your connection.');
+            }
+        }
     </script>
 </body>
 </html>
